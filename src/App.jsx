@@ -8,6 +8,9 @@ import { CartProvider } from './Context/CartContext';
 import CartSidebar from './components/CartSidebar';
 import Checkout from './pages/customer/Checkout';
 import Orders from './pages/customer/Orders';
+import Login from './pages/customer/Login';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './pages/admin/Dashboard';
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);

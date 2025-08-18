@@ -8,6 +8,10 @@ function Navbar({ onCartClick }) {
   const { cartItems } = useCart();
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Get logged-in user
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
   return (
     <nav className="bg-orange-500 text-white p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
@@ -17,6 +21,28 @@ function Navbar({ onCartClick }) {
         <div className="flex space-x-6 items-center">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/menu" className="hover:underline">Menu</Link>
+
+          {/* Login / Logout handling */}
+          {user ? (
+            <>
+              <span className="font-semibold">{user.username}</span>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("user");
+                  window.location.href = "/login";
+                }}
+                className="hover:underline"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+          )}
+
+          {/* Cart button */}
           <button
             onClick={onCartClick}
             className="relative hover:text-gray-200"
