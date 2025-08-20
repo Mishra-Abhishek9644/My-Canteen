@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("All"); // 👈 new filter state
 
   useEffect(() => {
     const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
@@ -19,15 +20,37 @@ function Orders() {
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
   };
 
+  // Apply filter
+  const filteredOrders = orders.filter((order) =>
+    filter === "All" ? true : order.status === filter
+  );
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-xl font-bold mb-4">Your Orders</h2>
 
-      {orders.length === 0 ? (
-        <p className="text-gray-500">No orders placed yet.</p>
+      {/* Filter buttons */}
+      <div className="flex space-x-3 mb-6">
+        {["All", "Pending", "Completed", "Cancelled"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              filter === f
+                ? "bg-orange-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <p className="text-gray-500">No {filter} orders.</p>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div
               key={order.id}
               className="border rounded-lg p-4 shadow-sm bg-white"
@@ -35,7 +58,19 @@ function Orders() {
               <p className="text-sm text-gray-600">Order ID: {order.id}</p>
               <p className="text-sm text-gray-600">Date: {order.date}</p>
               <p className="font-semibold">Payment: {order.payment}</p>
-              <p className="font-semibold">Status: {order.status}</p>
+
+              {/* Status with color */}
+              <p
+                className={`font-semibold ${
+                  order.status === "Pending"
+                    ? "text-yellow-600"
+                    : order.status === "Completed"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                Status: {order.status}
+              </p>
 
               <ul className="mt-2">
                 {order.items.map((item) => (
