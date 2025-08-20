@@ -1,14 +1,14 @@
-import { useAuth } from "../Context/AuthContext";
-import { useCart } from "../Context/CartContext";
+import React from "react";
 import { Link } from "react-router-dom";
-import { FaShoppingCart , FaUser} from "react-icons/fa";
-
+import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { useCart } from "../Context/CartContext";
+import { useAuth } from "../Context/AuthContext";
 
 function Navbar({ onCartClick }) {
   const { cartItems } = useCart();
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const { user, logout } = useAuth(); // 👈 from context
+  const { user, logout } = useAuth();
 
   return (
     <nav className="bg-orange-500 text-white p-4 shadow-md">
@@ -18,18 +18,44 @@ function Navbar({ onCartClick }) {
         </Link>
 
         <div className="flex space-x-6 items-center">
-          <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/menu" className="hover:underline">Menu</Link>
+          {/* Links based on role */}
+          {!user && (
+            <>
+              <Link to="/" className="hover:underline">Home</Link>
+              <Link to="/menu" className="hover:underline">Menu</Link>
+            </>
+          )}
 
-          {/* Cart */}
-          <button onClick={onCartClick} className="relative hover:text-gray-200">
-            <FaShoppingCart size={20} />
-            {totalQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-xs px-1 rounded-full">
-                {totalQuantity}
-              </span>
-            )}
-          </button>
+          {user && user.role === "customer" && (
+            <>
+              <Link to="/" className="hover:underline">Home</Link>
+              <Link to="/menu" className="hover:underline">Menu</Link>
+              <Link to="/orders" className="hover:underline">My Orders</Link>  {/* 👈 new */}
+              <Link to="/feedback" className="hover:underline">Feedback</Link>
+
+              {/* Cart button */}
+              <button
+                onClick={onCartClick}
+                className="relative hover:text-gray-200"
+              >
+                <FaShoppingCart size={20} />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-xs px-1 rounded-full">
+                    {totalQuantity}
+                  </span>
+                )}
+              </button>
+            </>
+          )}
+
+
+          {user && user.role === "admin" && (
+            <>
+              <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link>
+              <Link to="/admin/orders" className="hover:underline">Orders</Link>
+              <Link to="/admin/feedbacks" className="hover:underline">Feedbacks</Link>
+            </>
+          )}
 
           {/* User section */}
           {user ? (
@@ -54,4 +80,5 @@ function Navbar({ onCartClick }) {
     </nav>
   );
 }
+
 export default Navbar;

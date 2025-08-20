@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../Context/AuthContext";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState("All"); // 👈 new filter state
+  const [filter, setFilter] = useState("All");
+  const { username } = useAuth();
 
   useEffect(() => {
-    const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-    setOrders(storedOrders);
-  }, []);
+  const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+  // filter orders belonging to this user + sort newest → oldest
+  const userOrders = storedOrders
+    .filter((o) => o.user === username)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  setOrders(userOrders);
+}, [username]);
 
-  // Cancel order handler
+
   const handleCancel = (orderId) => {
     const updatedOrders = orders.map((order) =>
       order.id === orderId && order.status === "Pending"
@@ -17,19 +23,39 @@ function Orders() {
         : order
     );
     setOrders(updatedOrders);
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    // update localStorage (only for this user’s orders)
+    const allOrders = JSON.parse(localStorage.getItem("orders")) || [];
+    const newAllOrders = allOrders.map((order) =>
+      order.id === orderId && order.user === username
+        ? { ...order, status: "Cancelled" }
+        : order
+    );
+    localStorage.setItem("orders", JSON.stringify(newAllOrders));
   };
 
-  // Apply filter
-  const filteredOrders = orders.filter((order) =>
-    filter === "All" ? true : order.status === filter
-  );
+  const filteredOrders =
+    filter === "All"
+      ? orders
+      : orders.filter((order) => order.status === filter);
+
+  const statusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "Completed":
+        return "bg-green-100 text-green-700";
+      case "Cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-xl font-bold mb-4">Your Orders</h2>
 
-      {/* Filter buttons */}
       <div className="flex space-x-3 mb-6">
         {["All", "Pending", "Completed", "Cancelled"].map((f) => (
           <button
@@ -59,18 +85,14 @@ function Orders() {
               <p className="text-sm text-gray-600">Date: {order.date}</p>
               <p className="font-semibold">Payment: {order.payment}</p>
 
-              {/* Status with color */}
-              <p
-                className={`font-semibold ${
-                  order.status === "Pending"
-                    ? "text-yellow-600"
-                    : order.status === "Completed"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+              {/* colored status badge */}
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${statusColor(
+                  order.status
+                )}`}
               >
-                Status: {order.status}
-              </p>
+                {order.status}
+              </span>
 
               <ul className="mt-2">
                 {order.items.map((item) => (
@@ -83,7 +105,6 @@ function Orders() {
 
               <div className="font-bold mt-2">Total: ₹{order.total}</div>
 
-              {/* Cancel button only if order is still pending */}
               {order.status === "Pending" && (
                 <button
                   onClick={() => handleCancel(order.id)}

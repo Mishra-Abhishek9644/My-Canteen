@@ -2,11 +2,13 @@
 import { useCart } from "../../Context/CartContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext"; // 👈 import auth
 
 function Checkout() {
   const { cartItems, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const navigate = useNavigate();
+  const { username } = useAuth(); // 👈 get current user
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -19,37 +21,29 @@ function Checkout() {
       return;
     }
 
-    // Create a new order object
+    // Create a new order object linked to the logged-in customer
     const newOrder = {
-  id: Date.now().toString() + Math.floor(Math.random() * 100000),
+      id: Date.now().toString() + Math.floor(Math.random() * 100000),
       items: cartItems,
       total: totalPrice,
       payment: paymentMethod,
       status: "Pending",
       date: new Date().toLocaleString(),
+      user: username, // 👈 store username
     };
 
     try {
-      // Get existing orders safely
       const stored = localStorage.getItem("orders");
       const existingOrders = stored ? JSON.parse(stored) : [];
 
-      // Add the new order
       const updatedOrders = [...existingOrders, newOrder];
-
-      // Save back to localStorage
       localStorage.setItem("orders", JSON.stringify(updatedOrders));
     } catch (err) {
       console.error("Error saving order:", err);
-
-      // If something went wrong, reset orders with just this one
       localStorage.setItem("orders", JSON.stringify([newOrder]));
     }
 
-    // Clear cart after placing order
     clearCart();
-
-    // Redirect to Orders page
     navigate("/orders");
   };
 

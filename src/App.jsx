@@ -11,7 +11,10 @@ import Orders from './pages/customer/Orders';
 import Login from './pages/customer/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/Dashboard';
+import AdminOrders from './pages/admin/AdminOrders';   // 👈 import
 import { AuthProvider } from './Context/AuthContext';
+import Feedback from "./pages/customer/Feedback";
+import AdminFeedbacks from './pages/admin/AdminFeedbacks'
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -45,6 +48,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/feedback"
+                element={
+                  <ProtectedRoute role="customer">
+                    <Feedback />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Admin-only routes */}
               <Route
@@ -55,14 +66,29 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute role="admin">
+                    <AdminOrders />   {/* 👈 new route */}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/feedbacks"
+                element={
+                  <ProtectedRoute role="admin">
+                    <AdminFeedbacks />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
-
           </div>
 
           {/* Sidebar */}
           <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
         </CartProvider>
-        </AuthProvider>
+      </AuthProvider>
     </Router>
   );
 }
