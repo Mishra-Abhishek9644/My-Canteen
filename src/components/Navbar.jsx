@@ -1,16 +1,14 @@
-// Navbar.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaShoppingCart } from 'react-icons/fa';
-import { useCart } from '../Context/CartContext';
+import { useAuth } from "../Context/AuthContext";
+import { useCart } from "../Context/CartContext";
+import { Link } from "react-router-dom";
+import { FaShoppingCart , FaUser} from "react-icons/fa";
+
 
 function Navbar({ onCartClick }) {
   const { cartItems } = useCart();
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Get logged-in user
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { user, logout } = useAuth(); // 👈 from context
 
   return (
     <nav className="bg-orange-500 text-white p-4 shadow-md">
@@ -18,35 +16,13 @@ function Navbar({ onCartClick }) {
         <Link to="/" className="text-2xl font-bold">
           Campus Canteen
         </Link>
+
         <div className="flex space-x-6 items-center">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/menu" className="hover:underline">Menu</Link>
 
-          {/* Login / Logout handling */}
-          {user ? (
-            <>
-              <span className="font-semibold">{user.username}</span>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("user");
-                  window.location.href = "/login";
-                }}
-                className="hover:underline"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link to="/login" className="hover:underline">
-              Login
-            </Link>
-          )}
-
-          {/* Cart button */}
-          <button
-            onClick={onCartClick}
-            className="relative hover:text-gray-200"
-          >
+          {/* Cart */}
+          <button onClick={onCartClick} className="relative hover:text-gray-200">
             <FaShoppingCart size={20} />
             {totalQuantity > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-xs px-1 rounded-full">
@@ -54,10 +30,28 @@ function Navbar({ onCartClick }) {
               </span>
             )}
           </button>
+
+          {/* User section */}
+          {user ? (
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <FaUser />
+                <span className="bg-white text-orange-600 px-2 py-1 rounded-full text-sm font-semibold">
+                  {user.username}
+                </span>
+              </div>
+              <button onClick={logout} className="hover:underline">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>
   );
 }
-
 export default Navbar;

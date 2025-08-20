@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("customer"); // default
+  const [role, setRole] = useState("customer");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = () => {
     if (!username) {
@@ -12,10 +14,9 @@ function Login() {
       return;
     }
 
-    // Save user in localStorage
-    localStorage.setItem("user", JSON.stringify({ username, role }));
+    const userData = { username, role };
+    login(userData);
 
-    // Redirect based on role
     if (role === "admin") {
       navigate("/admin/dashboard");
     } else {

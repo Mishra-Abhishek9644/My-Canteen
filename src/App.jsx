@@ -11,55 +11,58 @@ import Orders from './pages/customer/Orders';
 import Login from './pages/customer/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/Dashboard';
+import { AuthProvider } from './Context/AuthContext';
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
     <Router>
-      <CartProvider>
-        <Navbar onCartClick={() => setIsCartOpen(true)} />
+      <AuthProvider>
+        <CartProvider>
+          <Navbar onCartClick={() => setIsCartOpen(true)} />
 
-        <div className="container mx-auto p-4">
-          <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/menu" element={<Menu />} />
-  <Route path="/login" element={<Login />} />
+          <div className="container mx-auto p-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/login" element={<Login />} />
 
-  {/* Customer-only routes */}
-  <Route
-    path="/checkout"
-    element={
-      <ProtectedRoute role="customer">
-        <Checkout />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/orders"
-    element={
-      <ProtectedRoute role="customer">
-        <Orders />
-      </ProtectedRoute>
-    }
-  />
+              {/* Customer-only routes */}
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute role="customer">
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute role="customer">
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
 
-  {/* Admin-only routes */}
-  <Route
-    path="/admin/dashboard"
-    element={
-      <ProtectedRoute role="admin">
-        <AdminDashboard />
-      </ProtectedRoute>
-    }
-  />
-</Routes>
+              {/* Admin-only routes */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute role="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
 
-        </div>
+          </div>
 
-        {/* Sidebar */}
-        <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      </CartProvider>
+          {/* Sidebar */}
+          <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+        </CartProvider>
+        </AuthProvider>
     </Router>
   );
 }
