@@ -1,3 +1,4 @@
+// pages/customer/Orders.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -7,14 +8,15 @@ function Orders() {
   const { username } = useAuth();
 
   useEffect(() => {
-  const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-  // filter orders belonging to this user + sort newest → oldest
-  const userOrders = storedOrders
-    .filter((o) => o.user === username)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-  setOrders(userOrders);
-}, [username]);
+    const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
+    // filter orders belonging to this user + sort newest → oldest
+    const userOrders = storedOrders
+      .filter((o) => o.user === username)
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    setOrders(userOrders);
+  }, [username]);
 
   const handleCancel = (orderId) => {
     const updatedOrders = orders.map((order) =>
@@ -56,6 +58,7 @@ function Orders() {
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-xl font-bold mb-4">Your Orders</h2>
 
+      {/* Filter buttons */}
       <div className="flex space-x-3 mb-6">
         {["All", "Pending", "Completed", "Cancelled"].map((f) => (
           <button
@@ -73,7 +76,9 @@ function Orders() {
       </div>
 
       {filteredOrders.length === 0 ? (
-        <p className="text-gray-500">No {filter} orders.</p>
+        <p className="text-gray-500">
+          No {filter} orders yet, go grab something delicious 🍔
+        </p>
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order) => (

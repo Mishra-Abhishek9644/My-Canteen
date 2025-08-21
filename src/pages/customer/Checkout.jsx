@@ -29,7 +29,8 @@ function Checkout() {
       payment: paymentMethod,
       status: "Pending",
       date: new Date().toLocaleString(),
-      user: username, // 👈 store username
+      timestamp: Date.now(), // 👈 real numeric timestamp for sorting
+      user: username,        // 👈 store username
     };
 
     try {
