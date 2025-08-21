@@ -2,16 +2,15 @@ import { useEffect, useState } from "react";
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
+  const [search, setSearch] = useState(""); // 👈 new state
 
-useEffect(() => {
-  const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-  // sort newest → oldest
-  const sorted = [...storedOrders].sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
-  setOrders(sorted);
-}, []);
-
+  useEffect(() => {
+    const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
+    const sorted = [...storedOrders].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+    setOrders(sorted);
+  }, []);
 
   const saveOrders = (updated) => {
     setOrders(updated);
@@ -40,15 +39,31 @@ useEffect(() => {
     }
   };
 
+  // 👇 filter orders by search (username or ID)
+  const filteredOrders = orders.filter(
+    (o) =>
+      o.id.toLowerCase().includes(search.toLowerCase()) ||
+      (o.user && o.user.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Manage Orders</h2>
 
-      {orders.length === 0 ? (
-        <p className="text-gray-500">No orders yet.</p>
+      {/* Search bar */}
+      <input
+        type="text"
+        placeholder="Search by Order ID or Username..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mb-6 w-full p-2 border rounded"
+      />
+
+      {filteredOrders.length === 0 ? (
+        <p className="text-gray-500">No matching orders.</p>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div
               key={order.id}
               className="border rounded-lg p-4 bg-white shadow-sm"
@@ -77,7 +92,6 @@ useEffect(() => {
               </ul>
 
               <div className="mt-3 flex items-center space-x-3">
-                {/* colored badge */}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColor(
                     order.status

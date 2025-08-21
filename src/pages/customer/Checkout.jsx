@@ -1,14 +1,14 @@
-// pages/customer/Checkout.jsx
 import { useCart } from "../../Context/CartContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Context/AuthContext"; // 👈 import auth
+import { useAuth } from "../../Context/AuthContext";
+import toast, { Toaster } from "react-hot-toast"; // 👈 import toast
 
 function Checkout() {
   const { cartItems, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const navigate = useNavigate();
-  const { username } = useAuth(); // 👈 get current user
+  const { username } = useAuth();
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -17,11 +17,10 @@ function Checkout() {
 
   const handleConfirmOrder = () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty!");
+      toast.error("Your cart is empty!");
       return;
     }
 
-    // Create a new order object linked to the logged-in customer
     const newOrder = {
       id: Date.now().toString() + Math.floor(Math.random() * 100000),
       items: cartItems,
@@ -29,14 +28,12 @@ function Checkout() {
       payment: paymentMethod,
       status: "Pending",
       date: new Date().toLocaleString(),
-      timestamp: Date.now(), // 👈 real numeric timestamp for sorting
-      user: username,        // 👈 store username
+      user: username,
     };
 
     try {
       const stored = localStorage.getItem("orders");
       const existingOrders = stored ? JSON.parse(stored) : [];
-
       const updatedOrders = [...existingOrders, newOrder];
       localStorage.setItem("orders", JSON.stringify(updatedOrders));
     } catch (err) {
@@ -45,11 +42,16 @@ function Checkout() {
     }
 
     clearCart();
-    navigate("/orders");
+
+    // 👇 Show success toast then navigate
+    toast.success("Order placed successfully 🎉");
+    setTimeout(() => navigate("/orders"), 1500);
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+      <Toaster position="top-center" /> {/* 👈 toaster container */}
+
       <h2 className="text-xl font-bold mb-4">Checkout</h2>
 
       {/* Order Summary */}

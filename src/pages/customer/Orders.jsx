@@ -64,11 +64,10 @@ function Orders() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              filter === f
+            className={`px-4 py-2 rounded-full text-sm font-medium ${filter === f
                 ? "bg-orange-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
           >
             {f}
           </button>
@@ -87,7 +86,10 @@ function Orders() {
               className="border rounded-lg p-4 shadow-sm bg-white"
             >
               <p className="text-sm text-gray-600">Order ID: {order.id}</p>
-              <p className="text-sm text-gray-600">Date: {order.date}</p>
+              <p className="text-sm text-gray-600">
+                Date: {new Date(order.date).toLocaleString()}
+              </p>
+
               <p className="font-semibold">Payment: {order.payment}</p>
 
               {/* colored status badge */}
