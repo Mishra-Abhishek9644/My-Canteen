@@ -1,23 +1,29 @@
-import { useState } from 'react';
-import { FaSearch, FaFilter, FaStar, FaFire, FaLeaf, FaGlassWhiskey, FaPlus, FaMinus } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom"; // 👈 NEW
+import { FaSearch, FaFilter, FaStar, FaFire, FaLeaf, FaPlus, FaMinus } from 'react-icons/fa';
 import { useCart } from "../../Context/CartContext";
-import { products } from '../../data/products'; // shared data
-
+import { products } from '../../data/products';
 
 const MenuPage = () => {
-  // Sample menu data (replace with your actual data)
   const { addToCart, cartItems, updateQuantity } = useCart();
   const menuItems = products.filter(item => item.category !== 'combo');
+  const categories = ['all', ...new Set(menuItems.map(item => item.category))];
 
+
+  const location = useLocation(); // 👈 NEW
+  const params = new URLSearchParams(location.search);
+  const initialSearch = params.get("search") || ""; // 👈 take ?search= value
 
   // State for filters
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch); // 👈 default from URL
   const [activeCategory, setActiveCategory] = useState('all');
   const [foodType, setFoodType] = useState('all');
   const [spicyFilter, setSpicyFilter] = useState(false);
 
-  // Get unique categories
-  const categories = ['all', ...new Set(menuItems.map(item => item.category))];
+  // Sync searchTerm when URL changes
+  useEffect(() => {
+    setSearchTerm(initialSearch);
+  }, [initialSearch]);
 
   // Filter logic
   const filteredItems = menuItems.filter(item => {
@@ -29,7 +35,7 @@ const MenuPage = () => {
     );
   });
 
-  // Get quantity for each item in cart
+  // cart quantity helper
   const getItemQuantity = (id) => {
     const itemInCart = cartItems.find(item => item.id === id);
     return itemInCart ? itemInCart.quantity : 0;
@@ -37,9 +43,6 @@ const MenuPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      
-      {/* Filters Section */}
       <div className="container mx-auto px-4 py-6">
         {/* Search Bar */}
         <div className="relative mb-6">

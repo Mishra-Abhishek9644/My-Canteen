@@ -20,7 +20,11 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import { AuthProvider, useAuth } from "./Context/AuthContext";
 import Feedback from "./pages/customer/Feedback";
 import AdminFeedbacks from "./pages/admin/AdminFeedbacks";
-
+import Profile from './pages/customer/Profile'
+import Contact from "./pages/customer/Contact";
+import AdminMessages from "./pages/admin/AdminMessages";
+import About from "./pages/customer/About";
+import NotFound from "./pages/NotFound";
 // 🔹 Inner component so we can use useAuth()
 function AppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -56,6 +60,11 @@ function AppContent() {
 
           <Route path="/menu" element={<Menu />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+
+
 
           {/* Customer-only routes */}
           <Route
@@ -82,6 +91,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute role="customer">
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Admin-only routes */}
           <Route
@@ -105,6 +122,14 @@ function AppContent() {
             element={
               <ProtectedRoute role="admin">
                 <AdminFeedbacks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/messages"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminMessages />
               </ProtectedRoute>
             }
           />
