@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
-  const [search, setSearch] = useState(""); // 👈 new state
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
     const sorted = [...storedOrders].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => (b.timestamp || 0) - (a.timestamp || 0) // 👈 sort by timestamp
     );
     setOrders(sorted);
   }, []);
@@ -69,7 +69,12 @@ function AdminOrders() {
               className="border rounded-lg p-4 bg-white shadow-sm"
             >
               <p className="text-sm text-gray-600">Order ID: {order.id}</p>
-              <p className="text-sm text-gray-600">Date: {order.date}</p>
+              <p className="text-sm text-gray-600">
+                Date:{" "}
+                {order.timestamp
+                  ? new Date(order.timestamp).toLocaleString()
+                  : "Unknown"}
+              </p>
 
               {/* customer badge */}
               <p className="font-medium">

@@ -13,7 +13,11 @@ function Orders() {
     // filter orders belonging to this user + sort newest → oldest
     const userOrders = storedOrders
       .filter((o) => o.user === username)
-      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      .sort((a, b) => {
+        const timeA = a.timestamp ? a.timestamp : new Date(a.date).getTime();
+        const timeB = b.timestamp ? b.timestamp : new Date(b.date).getTime();
+        return timeB - timeA; // newest first
+      });
 
     setOrders(userOrders);
   }, [username]);
@@ -26,7 +30,7 @@ function Orders() {
     );
     setOrders(updatedOrders);
 
-    // update localStorage (only for this user’s orders)
+    // update localStorage
     const allOrders = JSON.parse(localStorage.getItem("orders")) || [];
     const newAllOrders = allOrders.map((order) =>
       order.id === orderId && order.user === username
@@ -64,10 +68,11 @@ function Orders() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${filter === f
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              filter === f
                 ? "bg-orange-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+            }`}
           >
             {f}
           </button>
@@ -87,7 +92,8 @@ function Orders() {
             >
               <p className="text-sm text-gray-600">Order ID: {order.id}</p>
               <p className="text-sm text-gray-600">
-                Date: {new Date(order.date).toLocaleString()}
+                Date:{" "}
+                {new Date(order.timestamp || order.date).toLocaleString()}
               </p>
 
               <p className="font-semibold">Payment: {order.payment}</p>

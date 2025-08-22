@@ -2,7 +2,7 @@ import { useCart } from "../../Context/CartContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
-import toast, { Toaster } from "react-hot-toast"; // 👈 import toast
+import toast, { Toaster } from "react-hot-toast";
 
 function Checkout() {
   const { cartItems, clearCart } = useCart();
@@ -27,7 +27,7 @@ function Checkout() {
       total: totalPrice,
       payment: paymentMethod,
       status: "Pending",
-      date: new Date().toLocaleString(),
+      timestamp: Date.now(), // store raw timestamp
       user: username,
     };
 
@@ -42,15 +42,13 @@ function Checkout() {
     }
 
     clearCart();
-
-    // 👇 Show success toast then navigate
     toast.success("Order placed successfully 🎉");
     setTimeout(() => navigate("/orders"), 1500);
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-      <Toaster position="top-center" /> {/* 👈 toaster container */}
+      <Toaster position="top-center" />
 
       <h2 className="text-xl font-bold mb-4">Checkout</h2>
 
