@@ -25,6 +25,10 @@ import Contact from "./pages/customer/Contact";
 import AdminMessages from "./pages/admin/AdminMessages";
 import About from "./pages/customer/About";
 import NotFound from "./pages/NotFound";
+
+// ✅ NEW
+import { Toaster } from "react-hot-toast";
+
 // 🔹 Inner component so we can use useAuth()
 function AppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -38,7 +42,6 @@ function AppContent() {
       </div>
     );
   }
-
 
   return (
     <>
@@ -63,8 +66,6 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="*" element={<NotFound />} />
-
-
 
           {/* Customer-only routes */}
           <Route
@@ -138,6 +139,9 @@ function AppContent() {
 
       {/* Sidebar */}
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* ✅ Toast container (MUST be inside AppContent or App) */}
+      <Toaster position="top-center" reverseOrder={false} />
     </>
   );
 }

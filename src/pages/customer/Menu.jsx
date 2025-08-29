@@ -1,31 +1,31 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom"; // 👈 NEW
+import { useLocation, useNavigate } from "react-router-dom"; // 👈 added useNavigate
 import { FaSearch, FaFilter, FaStar, FaFire, FaLeaf, FaPlus, FaMinus } from 'react-icons/fa';
 import { useCart } from "../../Context/CartContext";
 import { products } from '../../data/products';
+import { useAuth } from "../../Context/AuthContext"; // 👈 added
+import toast from "react-hot-toast"; // 👈 added
 
 const MenuPage = () => {
+  const { user } = useAuth(); // 👈 get logged in user
+  const navigate = useNavigate(); // 👈 for redirect
   const { addToCart, cartItems, updateQuantity } = useCart();
   const menuItems = products.filter(item => item.category !== 'combo');
   const categories = ['all', ...new Set(menuItems.map(item => item.category))];
 
-
-  const location = useLocation(); // 👈 NEW
+  const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const initialSearch = params.get("search") || ""; // 👈 take ?search= value
+  const initialSearch = params.get("search") || "";
 
-  // State for filters
-  const [searchTerm, setSearchTerm] = useState(initialSearch); // 👈 default from URL
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [activeCategory, setActiveCategory] = useState('all');
   const [foodType, setFoodType] = useState('all');
   const [spicyFilter, setSpicyFilter] = useState(false);
 
-  // Sync searchTerm when URL changes
   useEffect(() => {
     setSearchTerm(initialSearch);
   }, [initialSearch]);
 
-  // Filter logic
   const filteredItems = menuItems.filter(item => {
     return (
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -35,7 +35,6 @@ const MenuPage = () => {
     );
   });
 
-  // cart quantity helper
   const getItemQuantity = (id) => {
     const itemInCart = cartItems.find(item => item.id === id);
     return itemInCart ? itemInCart.quantity : 0;
@@ -147,21 +146,42 @@ const MenuPage = () => {
                       {quantity === 0 ? (
                         <button 
                           className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
-                          onClick={() => addToCart(item)}
+                          onClick={() => {
+                            if (!user) {
+                              toast.error("Please login to add items to cart!");
+                              navigate("/login");
+                              return;
+                            }
+                            addToCart(item);
+                          }}
                         >
                           Add to Cart
                         </button>
                       ) : (
                         <div className="flex items-center space-x-2 bg-orange-100 rounded-lg px-2 py-1">
                           <button
-                            onClick={() => updateQuantity(item.id, quantity - 1)}
+                            onClick={() => {
+                              if (!user) {
+                                toast.error("Please login to modify cart!");
+                                navigate("/login");
+                                return;
+                              }
+                              updateQuantity(item.id, quantity - 1);
+                            }}
                             className="text-orange-500 hover:text-orange-700 p-1"
                           >
                             <FaMinus />
                           </button>
                           <span className="w-8 text-center font-medium">{quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.id, quantity + 1)}
+                            onClick={() => {
+                              if (!user) {
+                                toast.error("Please login to modify cart!");
+                                navigate("/login");
+                                return;
+                              }
+                              updateQuantity(item.id, quantity + 1);
+                            }}
                             className="text-orange-500 hover:text-orange-700 p-1"
                           >
                             <FaPlus />

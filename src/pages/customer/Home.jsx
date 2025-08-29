@@ -4,12 +4,14 @@ import { FaSearch, FaUtensils, FaClock, FaStar, FaPlus, FaMinus } from "react-ic
 import canteenImg from '../../assets/canteen.jpg';
 import { useCart } from '../../Context/CartContext.jsx';
 import { products } from "../../data/products.js";
+import { useAuth } from "../../Context/AuthContext";
+import toast from "react-hot-toast"; // 👈 import toast
 
 const Home = () => {
+  const { user } = useAuth(); // 👈 get logged in user
   const { addToCart, cartItems, updateQuantity } = useCart();
   const comboItems = products.filter(item => item.category === 'combo');
 
-  // Search state for hero search bar
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
 
@@ -19,7 +21,6 @@ const Home = () => {
     }
   };
 
-  // Get quantity for each item in cart
   const getItemQuantity = (id) => {
     const itemInCart = cartItems.find(item => item.id === id);
     return itemInCart ? itemInCart.quantity : 0;
@@ -37,15 +38,11 @@ const Home = () => {
             e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80';
           }}
         />
-
-        {/* Dark overlay */}
         <div className="absolute bg-black/50 inset-0 flex items-center justify-center">
           <div className="w-full max-w-2xl px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-xl">
               Welcome to <span className="text-orange-400">Campus Canteen</span>
             </h1>
-
-            {/* Search bar */}
             <div className="relative max-w-md mx-auto">
               <input
                 type="text"
@@ -73,7 +70,6 @@ const Home = () => {
           <p className="text-gray-600 mt-2">Delicious meals at discounted prices</p>
         </div>
 
-        {/* Food Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {comboItems.map((item) => {
             const quantity = getItemQuantity(item.id);
@@ -101,24 +97,46 @@ const Home = () => {
                       <FaStar className="mr-1" />
                       <span className="text-gray-700">4.5</span>
                     </div>
+
                     {quantity === 0 ? (
                       <button
                         className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-                        onClick={() => addToCart(item)}
+                        onClick={() => {
+                          if (!user) {
+                            toast.error("Please login to add items to cart!");
+                            navigate("/login");
+                            return;
+                          }
+                          addToCart(item);
+                        }}
                       >
                         Add to Cart
                       </button>
                     ) : (
                       <div className="flex items-center space-x-2 bg-orange-100 rounded-lg px-2 py-1">
                         <button
-                          onClick={() => updateQuantity(item.id, quantity - 1)}
+                          onClick={() => {
+                            if (!user) {
+                              toast.error("Please login to modify cart!");
+                              navigate("/login");
+                              return;
+                            }
+                            updateQuantity(item.id, quantity - 1);
+                          }}
                           className="text-orange-500 hover:text-orange-700 p-1"
                         >
                           <FaMinus />
                         </button>
                         <span className="w-8 text-center font-medium">{quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, quantity + 1)}
+                          onClick={() => {
+                            if (!user) {
+                              toast.error("Please login to modify cart!");
+                              navigate("/login");
+                              return;
+                            }
+                            updateQuantity(item.id, quantity + 1);
+                          }}
                           className="text-orange-500 hover:text-orange-700 p-1"
                         >
                           <FaPlus />
