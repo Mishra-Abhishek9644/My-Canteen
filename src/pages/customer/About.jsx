@@ -8,17 +8,17 @@ const team = [
     img: "https://via.placeholder.com/150", // replace with your photo
   },
   {
-    name: "Student 2",
+    name: "Deepraj ",
     role: "Backend Developer",
     img: "https://via.placeholder.com/150",
   },
   {
-    name: "Student 3",
+    name: "Devanshi ",
     role: "UI/UX Designer",
     img: "https://via.placeholder.com/150",
   },
   {
-    name: "Student 4",
+    name: "Suraj Chaudhary",
     role: "Project Coordinator",
     img: "https://via.placeholder.com/150",
   },
