@@ -43,7 +43,9 @@ function Checkout() {
 
     clearCart();
     toast.success("Order placed successfully 🎉");
-    setTimeout(() => navigate("/orders"), 1500);
+    setTimeout(() =>{
+       toast.dismiss(); 
+     navigate("/orders")}, 1500);
   };
 
   return (
