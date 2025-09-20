@@ -102,7 +102,7 @@ function Navbar({ onCartClick }) {
 
       {/* Mobile dropdown menu */}
       {isOpen && (
-        <div className="md:hidden bg-orange-600 px-4 py-3 space-y-3">
+        <div className="md:hidden bg-orange-600 px-4 py-3 space-y-3 space-x-5">
           {!user && (
             <>
               <Link to="/" onClick={() => setIsOpen(false)}>Home</Link>
@@ -117,7 +117,7 @@ function Navbar({ onCartClick }) {
               <Link to="/menu" onClick={() => setIsOpen(false)}>Menu</Link>
               <Link to="/orders" onClick={() => setIsOpen(false)}>My Orders</Link>
               <Link to="/feedback" onClick={() => setIsOpen(false)}>Feedback</Link>
-              <button onClick={onCartClick} className="flex items-center">
+              <button onClick={onCartClick} className="flex items-center mt-2">
                 <FaShoppingCart className="mr-1" /> Cart ({totalQuantity})
               </button>
             </>
