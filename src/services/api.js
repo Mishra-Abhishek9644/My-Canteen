@@ -33,6 +33,16 @@ export const getMenu = () => API.get("/menu");export const loginUser = (email, p
 export const registerUser = (username, email, password) =>
   API.post("/auth/register", { username, email, password });
 
+export const updateOrder = (id,status) =>
+  API.put(`/orders/${id}/status`, { status });
+
+export const cancelOrderApi = (id) =>
+  API.put(`/orders/${id}/cancel`);
+
+export const getAllFeedbacks = () => API.get("/feedback/all");
+export const getAllMessages = () => API.get("/messages/all");
+
+
 
 export default {
   loginUser,
@@ -40,5 +50,9 @@ export default {
   getAllOrders,
   getMyOrders,
   createOrder,
-  getMenu
+  getMenu,
+  updateOrder,
+  cancelOrderApi,
+  getAllFeedbacks,
+  getAllMessages
 };

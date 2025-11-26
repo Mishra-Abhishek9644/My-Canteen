@@ -1,5 +1,6 @@
 // pages/customer/Contact.jsx
 import { useState } from "react";
+import { submitMessageApi } from "../../services/api";
 
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -8,21 +9,13 @@ function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    const newMessage = {
-      id: Date.now().toString() + Math.floor(Math.random() * 1000),
-      ...form,
-      date: new Date().toLocaleString(),
-    };
-
-    const stored = JSON.parse(localStorage.getItem("messages")) || [];
-    localStorage.setItem("messages", JSON.stringify([...stored, newMessage]));
-
-    alert("✅ Message sent successfully!");
-    setForm({ name: "", email: "", message: "" });
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  await submitMessageApi(form);
+  alert("Message delivered!");
+  setForm({ name: "", email: "", message: "" });
+};
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
