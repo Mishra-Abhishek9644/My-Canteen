@@ -74,7 +74,6 @@ function Navbar({ onCartClick }) {
           )}
 
           {/* User section */}
-          // In Navbar → replace the user section with this:
           {user ? (
             <div className="flex items-center gap-4">
               <span className="font-bold text-lg">{user.username}</span>
