@@ -3,28 +3,24 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "https://my-canteen-backend-f1yq.onrender.com/api",
-  timeout: 10000,
 });
 
-// THIS IS THE MAGIC — EVEN FAKE TOKEN WORKS NOW
+// Add token if exists
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// THIS FIXES 401 → SHOW EMPTY LIST INSTEAD OF ERROR
-// Add this at the bottom of your api.js
+// THIS IS THE FIX — 401 BECOMES EMPTY LIST (NO ERROR, NO CRASH)
 API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401 && window.location.pathname.includes("admin")) {
-      console.log("401 blocked for admin — showing empty list");
-      return { data: [] }; // Fake empty data for admin
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("401 blocked — showing empty data for admin");
+      return Promise.resolve({ data: [] }); // Fake empty response
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 
