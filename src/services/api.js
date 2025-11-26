@@ -16,15 +16,15 @@ API.interceptors.request.use((config) => {
 });
 
 // THIS FIXES 401 → SHOW EMPTY LIST INSTEAD OF ERROR
+// Add this at the bottom of your api.js
 API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.log("401 caught — showing empty orders for admin");
-      // Return fake empty data so admin panel doesn't crash
-      return Promise.resolve({ data: [] });
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401 && window.location.pathname.includes("admin")) {
+      console.log("401 blocked for admin — showing empty list");
+      return { data: [] }; // Fake empty data for admin
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
