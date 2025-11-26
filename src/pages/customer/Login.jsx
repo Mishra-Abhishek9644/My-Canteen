@@ -1,56 +1,99 @@
+// pages/customer/Login.jsx  ← FULL REPLACEMENT
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Context/AuthContext";
+import { loginUser, registerUser } from "../../services/api";
+import toast from "react-hot-toast";
 
 function Login() {
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState("customer");
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    username: "", email: "", password: ""
+  });
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const handleLogin = () => {
-    if (!username) {
-      alert("Enter a username!");
-      return;
-    }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const userData = { username, role };
-    login(userData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let res;
+      if (isLogin) {
+        res = await loginUser(formData.email, formData.password);
+      } else {
+        res = await registerUser(formData.username, formData.email, formData.password);
+      }
 
-    if (role === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      toast.success(isLogin ? "Login Successful!" : "Registered Successfully!");
+      
+      if (res.data.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-20 p-6 bg-white shadow rounded">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
-      
-      <input
-        type="text"
-        placeholder="Enter username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="w-full p-2 border rounded mb-3"
-      />
+    <div className="max-w-md mx-auto mt-20 p-8 bg-white shadow-xl rounded-2xl">
+      <h2 className="text-3xl font-bold text-center mb-8 text-orange-600">
+        {isLogin ? "Welcome Back!" : "Join Campus Canteen"}
+      </h2>
 
-      <select
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-        className="w-full p-2 border rounded mb-3"
-      >
-        <option value="customer">Customer</option>
-        <option value="admin">Admin</option>
-      </select>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {!isLogin && (
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required={!isLogin}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+          />
+        )}
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+        />
 
-      <button
-        onClick={handleLogin}
-        className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
-      >
-        Login
-      </button>
+        <button
+          type="submit"
+          className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 font-bold text-lg"
+        >
+          {isLogin ? "Login" : "Register"}
+        </button>
+      </form>
+
+      <p className="text-center mt-6 text-gray-600">
+        {isLogin ? "Don't have an account? " : "Already have an account? "}
+        <button
+          onClick={() => setIsLogin(!isLogin)}
+          className="text-orange-500 font-bold hover:underline"
+        >
+          {isLogin ? "Register" : "Login"}
+        </button>
+      </p>
     </div>
   );
 }

@@ -1,106 +1,69 @@
+// pages/customer/Checkout.jsx  ← FULL REPLACEMENT
 import { useCart } from "../../Context/CartContext";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { createOrder } from "../../services/api";
 
 function Checkout() {
-  const { cartItems, clearCart } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const { cartItems, clearCart, totalPrice } = useCart();
+  const [paymentMethod] = useState("COD");
   const navigate = useNavigate();
-  const { username } = useAuth();
+  const { user } = useAuth();
 
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
     if (cartItems.length === 0) {
-      toast.error("Your cart is empty!");
+      toast.error("Cart is empty!");
       return;
     }
 
-    const newOrder = {
-      id: Date.now().toString() + Math.floor(Math.random() * 100000),
-      items: cartItems,
-      total: totalPrice,
-      payment: paymentMethod,
-      status: "Pending",
-      timestamp: Date.now(), // store raw timestamp
-      user: username,
-    };
-
-    try {
-      const stored = localStorage.getItem("orders");
-      const existingOrders = stored ? JSON.parse(stored) : [];
-      const updatedOrders = [...existingOrders, newOrder];
-      localStorage.setItem("orders", JSON.stringify(updatedOrders));
-    } catch (err) {
-      console.error("Error saving order:", err);
-      localStorage.setItem("orders", JSON.stringify([newOrder]));
+    if (!user) {
+      toast.error("Please login first!");
+      navigate("/login");
+      return;
     }
 
-    clearCart();
-    toast.success("Order placed successfully 🎉");
-    setTimeout(() =>{
-       toast.dismiss(); 
-     navigate("/orders")}, 1500);
+    try {
+      await createOrder({
+        items: cartItems.map(item => ({
+          id: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image
+        })),
+        totalAmount: totalPrice
+      });
+
+      clearCart();
+      toast.success("Order Placed Successfully!");
+      navigate("/orders");
+    } catch (err) {
+      toast.error("Failed to place order");
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-      <Toaster position="top-center" />
+      <h2 className="text-2xl font-bold mb-6">Checkout</h2>
 
-      <h2 className="text-xl font-bold mb-4">Checkout</h2>
-
-      {/* Order Summary */}
-      <div className="mb-4">
-        <h3 className="font-semibold mb-2">Order Summary</h3>
-        {cartItems.map((item) => (
-          <div key={item.id} className="flex justify-between mb-2">
-            <span>
-              {item.name} × {item.quantity}
-            </span>
+      <div className="space-y-4">
+        {cartItems.map(item => (
+          <div key={item._id} className="flex justify-between">
+            <span>{item.name} × {item.quantity}</span>
             <span>₹{item.price * item.quantity}</span>
           </div>
         ))}
-        <div className="flex justify-between font-bold border-t pt-2 mt-2">
-          <span>Total</span>
-          <span>₹{totalPrice}</span>
+        <div className="border-t pt-4 font-bold text-xl">
+          Total: ₹{totalPrice}
         </div>
-      </div>
-
-      {/* Payment Method */}
-      <div className="mb-4">
-        <h3 className="font-semibold mb-2">Payment Method</h3>
-        <label className="flex items-center mb-2">
-          <input
-            type="radio"
-            value="COD"
-            checked={paymentMethod === "COD"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-2"
-          />
-          Cash on Delivery
-        </label>
-        <label className="flex items-center">
-          <input
-            type="radio"
-            value="Online"
-            checked={paymentMethod === "Online"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="mr-2"
-          />
-          Online Payment (Mock)
-        </label>
       </div>
 
       <button
         onClick={handleConfirmOrder}
-        className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
+        className="w-full mt-8 bg-orange-500 text-white py-4 rounded-lg text-xl hover:bg-orange-600 font-bold"
       >
-        Confirm Order
+        Confirm Order (COD)
       </button>
     </div>
   );
