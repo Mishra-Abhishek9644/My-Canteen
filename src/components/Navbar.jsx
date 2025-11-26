@@ -74,26 +74,16 @@ function Navbar({ onCartClick }) {
           )}
 
           {/* User section */}
+          // In Navbar → replace the user section with this:
           {user ? (
-            <div className="flex items-center space-x-4">
-              {/* Profile only for customers */}
-              {user.role === "customer" && (
-                <div
-                  className="flex items-center space-x-2 cursor-pointer"
-                  onClick={() => navigate("/profile")}
-                >
-                  <FaUser />
-                  <span className="bg-white text-orange-600 px-2 py-1 rounded-full text-sm font-semibold">
-                    Profile
-                  </span>
-                </div>
-              )}
-              <button onClick={logout} className="hover:underline">
+            <div className="flex items-center gap-4">
+              <span className="font-bold text-lg">{user.username}</span>
+              <button onClick={logout} className="bg-white text-orange-500 px-4 py-2 rounded-full font-bold hover:bg-gray-100">
                 Logout
               </button>
             </div>
           ) : (
-            <Link to="/login" className="hover:underline">
+            <Link to="/login" className="bg-white text-orange-500 px-6 py-2 rounded-full font-bold hover:bg-gray-100">
               Login
             </Link>
           )}

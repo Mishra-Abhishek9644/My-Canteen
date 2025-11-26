@@ -95,7 +95,7 @@ const Home = () => {
                         <FaStar className="mr-1" /><span className="text-gray-700">4.5</span>
                       </div>
                       {quantity === 0 ? (
-                        <button onClick={() => !user ? (toast.error("Login required!") || navigate("/login")) : addToCart({ ...item, id: item._id })}
+                        <button onClick={() => !user ? (toast.error("Login required!") || navigate("/login")) : addToCart(item)}
                           className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">
                           Add to Cart
                         </button>

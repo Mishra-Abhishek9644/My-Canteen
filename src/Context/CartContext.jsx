@@ -1,66 +1,54 @@
-// src/Context/CartContext.jsx
-import { products } from "../data/products";
+// src/Context/CartContext.jsx ← REPLACE ENTIRE FILE
 import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  // ✅ Lazy initializer: load cart from localStorage once before render
   const [cart, setCart] = useState(() => {
-    try {
-      const stored = localStorage.getItem("cart");
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // ✅ Save to localStorage whenever cart changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // === Actions ===
   const addToCart = (product) => {
-    setCart((prev) => {
-      const exists = prev.find((item) => item.id === product.id);
+    setCart(prev => {
+      const exists = prev.find(item => item._id === product._id);
       if (exists) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return prev.map(item =>
+          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { id: product.id, quantity: 1 }];
+      return [...prev, { ...product, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const updateQuantity = (_id, quantity) => {
+    if (quantity < 1) return;
+    setCart(prev => prev.map(item => item._id === _id ? { ...item, quantity } : item));
   };
 
-  const updateQuantity = (id, quantity) => {
-    if (quantity < 1) return;
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+  const removeFromCart = (_id) => {
+    setCart(prev => prev.filter(item => item._id !== _id));
   };
 
   const clearCart = () => setCart([]);
 
-  // === Derived items with product details ===
-  const cartItems = cart.map((item) => {
-    const product = products.find((p) => p.id === item.id);
-    return product
-      ? { ...product, quantity: item.quantity }
-      : { id: item.id, quantity: item.quantity }; // fallback
-  });
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}
-    >
+    <CartContext.Provider value={{
+      cartItems: cart,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      totalPrice,
+      totalItems
+    }}>
       {children}
     </CartContext.Provider>
   );
