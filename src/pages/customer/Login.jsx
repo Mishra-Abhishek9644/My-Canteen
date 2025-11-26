@@ -1,9 +1,8 @@
-// pages/customer/Login.jsx  ← REPLACE ENTIRE FILE
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, registerUser } from "../../services/api";
+import api from "../../services/api";  // ← FIXED: Default import
 import toast from "react-hot-toast";
-import { useAuth } from "../../Context/AuthContext";  // ← ADD THIS
+import { useAuth } from "../../Context/AuthContext";
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,7 +11,7 @@ function Login() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();  // ← Get login function
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,25 +24,21 @@ function Login() {
     try {
       let res;
       if (isLogin) {
-        res = await loginUser(formData.email, formData.password);
+        res = await api.loginUser(formData.email, formData.password);  // ← FIXED: api.
       } else {
         if (!formData.username.trim()) return toast.error("Username required!");
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return toast.error("Invalid email!");
         if (formData.password.length < 6) return toast.error("Password must be 6+ chars!");
 
-        res = await registerUser(formData.username, formData.email, formData.password);
+        res = await api.registerUser(formData.username, formData.email, formData.password);  // ← FIXED: api.
       }
 
-      // Save token + user
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-
-      // Update context immediately
       login(res.data.user);
 
       toast.success(isLogin ? "Login Successful!" : "Registered Successfully!");
 
-      // Redirect
       setTimeout(() => {
         navigate(res.data.user.role === "admin" ? "/admin/dashboard" : "/");
       }, 800);
