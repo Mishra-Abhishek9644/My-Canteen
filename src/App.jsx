@@ -20,7 +20,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import { AuthProvider, useAuth } from "./Context/AuthContext";
 import Feedback from "./pages/customer/Feedback";
 import AdminFeedbacks from "./pages/admin/AdminFeedbacks";
-import Profile from './pages/customer/Profile'
+import Profile from './pages/customer/UserProfile'
 import Contact from "./pages/customer/Contact";
 import AdminMessages from "./pages/admin/AdminMessages";
 import About from "./pages/customer/About";

@@ -27,6 +27,18 @@ API.interceptors.response.use(
 export const getAllOrders = () => API.get("/orders/all");
 export const getMyOrders = () => API.get("/orders/my-orders");
 export const createOrder = (data) => API.post("/orders/create", data);
-export const getMenu = () => API.get("/menu");
+export const getMenu = () => API.get("/menu");export const loginUser = (email, password) =>
+  API.post("/auth/login", { email, password });
 
-export default API;
+export const registerUser = (username, email, password) =>
+  API.post("/auth/register", { username, email, password });
+
+
+export default {
+  loginUser,
+  registerUser,
+  getAllOrders,
+  getMyOrders,
+  createOrder,
+  getMenu
+};
