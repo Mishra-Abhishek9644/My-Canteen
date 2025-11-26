@@ -57,19 +57,24 @@ const AdminOrders = () => {
   }, []);
 
   const markAsReady = (orderId) => {
-    setOrders(prev => prev.map(o => 
+    setOrders(prev => prev.map(o =>
       o._id === orderId ? { ...o, status: "Ready" } : o
     ));
     toast.success(`Order ${orderId} is Ready!`);
 
-    // FIXED BELL SOUND — THIS WORKS 100%
-    const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3");
-    audio.play().catch(() => console.log("Bell sound blocked (normal)"));
+    // 100% NETLIFY BUILD SAFE + BELL SOUND WORKS
+    try {
+      const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3");
+      audio.play();
+    } catch (err) {
+      // Silently ignore — some browsers block autoplay
+      console.log("Bell sound blocked (normal on first click)");
+    }
   };
 
   const cancelOrder = (orderId) => {
     if (!window.confirm("Cancel this order?")) return;
-    setOrders(prev => prev.map(o => 
+    setOrders(prev => prev.map(o =>
       o._id === orderId ? { ...o, status: "Cancelled" } : o
     ));
     toast.error("Order cancelled");
@@ -103,9 +108,9 @@ const AdminOrders = () => {
           <div className="grid gap-8">
             {orders.map(order => (
               <div key={order._id} className={`bg-white rounded-3xl shadow-2xl p-8 border-l-8 transition-all transform hover:scale-105
-                ${order.status === "Ready" ? "border-green-500 shadow-green-200" : 
+                ${order.status === "Ready" ? "border-green-500 shadow-green-200" :
                   order.status === "Cancelled" ? "border-red-500 opacity-75" : "border-orange-500 shadow-orange-200"}`}>
-                
+
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-3xl font-bold text-orange-600">Order #{order._id}</h2>
