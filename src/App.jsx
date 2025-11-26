@@ -15,7 +15,7 @@ import Checkout from "./pages/customer/Checkout";
 import Orders from "./pages/customer/Orders";
 import Login from "./pages/customer/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./pages/admin/Dashboard";
+import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import { AuthProvider, useAuth } from "./Context/AuthContext";
 import Feedback from "./pages/customer/Feedback";
@@ -106,7 +106,7 @@ function AppContent() {
             path="/admin/dashboard"
             element={
               <ProtectedRoute role="admin">
-                <AdminDashboard />
+                <Dashboard />
               </ProtectedRoute>
             }
           />

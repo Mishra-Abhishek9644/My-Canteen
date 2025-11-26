@@ -1,129 +1,117 @@
+// pages/admin/AdminOrders.jsx ← CREATE THIS FILE
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { getAllOrders } from "../../services/api";
 
-function AdminOrders() {
+const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const storedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-    const sorted = [...storedOrders].sort(
-      (a, b) => (b.timestamp || 0) - (a.timestamp || 0) // 👈 sort by timestamp
-    );
-    setOrders(sorted);
-  }, []);
-
-  const saveOrders = (updated) => {
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
-
-  const handleStatusChange = (orderId, newStatus) => {
-    const updatedOrders = orders.map((o) =>
-      o.id === orderId ? { ...o, status: newStatus } : o
-    );
-    saveOrders(updatedOrders);
-  };
-
-  const statusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-100 text-yellow-700";
-      case "Preparing":
-        return "bg-orange-100 text-orange-700";
-      case "Completed":
-        return "bg-green-100 text-green-700";
-      case "Cancelled":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
+  const fetchOrders = async () => {
+    try {
+      const res = await getAllOrders();
+      // Sort newest first
+      setOrders((res.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setLoading(false);
+    } catch {
+      toast.error("Failed to load orders");
+      setLoading(false);
     }
   };
 
-  // 👇 filter orders by search (username or ID)
-  const filteredOrders = orders.filter(
-    (o) =>
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      (o.user && o.user.toLowerCase().includes(search.toLowerCase()))
-  );
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 5000); // Auto-refresh every 5 sec
+    return () => clearInterval(interval);
+  }, []);
+
+  const markAsReady = (orderId) => {
+    setOrders(prev => prev.map(o => 
+      o._id === orderId ? { ...o, status: "Ready" } : o
+    ));
+    toast.success("Order marked as Ready!");
+    // Play bell sound (next step)
+  };
+
+  const cancelOrder = (orderId) => {
+    if (!window.confirm("Cancel this order?")) return;
+    setOrders(prev => prev.map(o => 
+      o._id === orderId ? { ...o, status: "Cancelled" } : o
+    ));
+    toast.success("Order cancelled");
+  };
+
+  if (loading) return <div className="text-center py-20 text-3xl">Loading orders...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Manage Orders</h2>
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-5xl font-bold text-orange-600 text-center mb-10">Admin - Live Orders</h1>
 
-      {/* Search bar */}
-      <input
-        type="text"
-        placeholder="Search by Order ID or Username..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-6 w-full p-2 border rounded"
-      />
+        {orders.length === 0 ? (
+          <div className="text-center py-20 text-2xl text-gray-600">No orders yet</div>
+        ) : (
+          <div className="grid gap-6">
+            {orders.map(order => (
+              <div key={order._id} className={`bg-white rounded-2xl shadow-xl p-8 border-l-8 
+                ${order.status === "Ready" ? "border-green-500" : 
+                  order.status === "Cancelled" ? "border-red-500" : "border-orange-500"}`}>
+                
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <p className="text-2xl font-bold">Order #{order._id.slice(-6)}</p>
+                    <p className="text-lg">Customer: <strong>{order.user?.username || "Unknown"}</strong></p>
+                    <p className="text-gray-600">Time: {new Date(order.createdAt).toLocaleTimeString()}</p>
+                  </div>
 
-      {filteredOrders.length === 0 ? (
-        <p className="text-gray-500">No matching orders.</p>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              className="border rounded-lg p-4 bg-white shadow-sm"
-            >
-              <p className="text-sm text-gray-600">Order ID: {order.id}</p>
-              <p className="text-sm text-gray-600">
-                Date:{" "}
-                {order.timestamp
-                  ? new Date(order.timestamp).toLocaleString()
-                  : "Unknown"}
-              </p>
+                  <span className={`px-6 py-3 rounded-full text-white text-xl font-bold
+                    ${order.status === "Pending" ? "bg-yellow-500" :
+                      order.status === "Ready" ? "bg-green-500" : "bg-red-500"}`}>
+                    {order.status}
+                  </span>
+                </div>
 
-              {/* customer badge */}
-              <p className="font-medium">
-                Customer:{" "}
-                <span className="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-sm">
-                  {order.user || "Unknown"}
-                </span>
-              </p>
+                <div className="border-t pt-4 mb-6">
+                  {order.items.map((item, i) => (
+                    <div key={i} className="flex justify-between py-2">
+                      <span className="font-medium">{item.name} × {item.quantity}</span>
+                      <span>₹{item.price * item.quantity}</span>
+                    </div>
+                  ))}
+                  <div className="font-bold text-xl text-right mt-4 text-orange-600">
+                    Total: ₹{order.totalAmount}
+                  </div>
+                </div>
 
-              <p className="font-semibold">Payment: {order.payment}</p>
-              <p className="font-semibold">Total: ₹{order.total}</p>
+                {order.status === "Pending" && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => markAsReady(order._id)}
+                      className="flex-1 bg-green-500 text-white py-4 rounded-xl font-bold text-xl hover:bg-green-600 transition"
+                    >
+                      Mark as Ready
+                    </button>
+                    <button
+                      onClick={() => cancelOrder(order._id)}
+                      className="flex-1 bg-red-500 text-white py-4 rounded-xl font-bold text-xl hover:bg-red-600 transition"
+                    >
+                      Cancel Order
+                    </button>
+                  </div>
+                )}
 
-              <ul className="mt-2 text-sm">
-                {order.items.map((item) => (
-                  <li key={item.id}>
-                    {item.name} × {item.quantity} = ₹
-                    {item.price * item.quantity}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-3 flex items-center space-x-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
-
-                <select
-                  value={order.status}
-                  onChange={(e) =>
-                    handleStatusChange(order.id, e.target.value)
-                  }
-                  className="p-2 border rounded"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Preparing">Preparing</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
+                {order.status === "Ready" && (
+                  <div className="text-center p-6 bg-green-100 rounded-xl">
+                    <p className="text-2xl font-bold text-green-800">Order Ready for Collection!</p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default AdminOrders;
